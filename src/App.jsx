@@ -9,10 +9,13 @@ const App = () => {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
+    console.log('Fetching todos from:', import.meta.env.VITE_API_URL);
     axios.get(import.meta.env.VITE_API_URL)
       .then(response => {
-        if (Array.isArray(response.data)) {
-          setTodos(response.data);
+        console.log('Response data:', response.data);
+        // Check if response data is an array
+        if (Array.isArray(response.data.todos)) {
+          setTodos(response.data.todos);
         } else {
           console.error('Unexpected response data format:', response.data);
         }
@@ -21,7 +24,9 @@ const App = () => {
   }, []);
 
   const addTodo = (todo) => {
-    axios.post(`${import.meta.env.VITE_API_URL}/create`, todo)
+    const url = `${import.meta.env.VITE_API_URL}/create`;
+    console.log('Adding todo to:', url);
+    axios.post(url, todo)
       .then(response => {
         if (response.data) {
           setTodos([...todos, response.data]);
@@ -31,7 +36,9 @@ const App = () => {
   };
 
   const updateTodo = (updatedTodo) => {
-    axios.put(`${import.meta.env.VITE_API_URL}/${updatedTodo._id}/update`, updatedTodo)
+    const url = `${import.meta.env.VITE_API_URL}/${updatedTodo._id}/update`;
+    console.log('Updating todo at:', url);
+    axios.put(url, updatedTodo)
       .then(response => {
         if (response.data) {
           setTodos(todos.map(todo => (todo._id === updatedTodo._id ? response.data : todo)));
@@ -41,7 +48,9 @@ const App = () => {
   };
 
   const deleteTodo = (id) => {
-    axios.delete(`${import.meta.env.VITE_API_URL}/${id}/delete`)
+    const url = `${import.meta.env.VITE_API_URL}/${id}/delete`;
+    console.log('Deleting todo at:', url);
+    axios.delete(url)
       .then(() => {
         setTodos(todos.filter(todo => todo._id !== id));
       })
