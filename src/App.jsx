@@ -10,20 +10,32 @@ const App = () => {
 
   useEffect(() => {
     axios.get(import.meta.env.VITE_API_URL)
-      .then(response => setTodos(response.data))
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          setTodos(response.data);
+        } else {
+          console.error('Unexpected response data format:', response.data);
+        }
+      })
       .catch(error => console.error('Error fetching todos:', error));
   }, []);
 
   const addTodo = (todo) => {
     axios.post(`${import.meta.env.VITE_API_URL}/create`, todo)
-      .then(response => setTodos([...todos, response.data]))
+      .then(response => {
+        if (response.data) {
+          setTodos([...todos, response.data]);
+        }
+      })
       .catch(error => console.error('Error adding todo:', error));
   };
 
   const updateTodo = (updatedTodo) => {
     axios.put(`${import.meta.env.VITE_API_URL}/${updatedTodo._id}/update`, updatedTodo)
       .then(response => {
-        setTodos(todos.map(todo => (todo._id === updatedTodo._id ? response.data : todo)));
+        if (response.data) {
+          setTodos(todos.map(todo => (todo._id === updatedTodo._id ? response.data : todo)));
+        }
       })
       .catch(error => console.error('Error updating todo:', error));
   };
@@ -36,11 +48,11 @@ const App = () => {
       .catch(error => console.error('Error deleting todo:', error));
   };
 
-  const filteredTodos = todos.filter(todo => {
+  const filteredTodos = Array.isArray(todos) ? todos.filter(todo => {
     if (filter === 'completed') return todo.status === 'completed';
     if (filter === 'incompleted') return todo.status === 'not_completed';
     return true;
-  });
+  }) : [];
 
   return (
     <div className="App">
