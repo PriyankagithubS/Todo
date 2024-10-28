@@ -9,59 +9,59 @@ const App = () => {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    console.log('Fetching todos from:', import.meta.env.VITE_API_URL);
-    axios.get(import.meta.env.VITE_API_URL)
-      .then(response => {
+    const fetchTodos = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/todos/get`);
         console.log('Response data:', response.data);
-        // Check if response data is an array
         if (Array.isArray(response.data.todos)) {
           setTodos(response.data.todos);
         } else {
           console.error('Unexpected response data format:', response.data);
         }
-      })
-      .catch(error => console.error('Error fetching todos:', error));
+      } catch (error) {
+        console.error('Error fetching todos:', error);
+      }
+    };
+
+    fetchTodos();
   }, []);
 
-  const addTodo = (todo) => {
-    const url = `${import.meta.env.VITE_API_URL}/create`;
-    console.log('Adding todo to:', url);
-    axios.post(url, todo)
-      .then(response => {
-        if (response.data) {
-          setTodos([...todos, response.data]);
-        }
-      })
-      .catch(error => console.error('Error adding todo:', error));
+  const addTodo = async (todo) => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/todos/create`, todo);
+      if (response.data) {
+        setTodos([...todos, response.data]);
+      }
+    } catch (error) {
+      console.error('Error adding todo:', error);
+    }
   };
 
-  const updateTodo = (updatedTodo) => {
-    const url = `${import.meta.env.VITE_API_URL}/${updatedTodo._id}/update`;
-    console.log('Updating todo at:', url);
-    axios.put(url, updatedTodo)
-      .then(response => {
-        if (response.data) {
-          setTodos(todos.map(todo => (todo._id === updatedTodo._id ? response.data : todo)));
-        }
-      })
-      .catch(error => console.error('Error updating todo:', error));
+  const updateTodo = async (updatedTodo) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/todos/${updatedTodo._id}/update`, updatedTodo);
+      if (response.data) {
+        setTodos(todos.map(todo => (todo._id === updatedTodo._id ? response.data : todo)));
+      }
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
   };
 
-  const deleteTodo = (id) => {
-    const url = `${import.meta.env.VITE_API_URL}/${id}/delete`;
-    console.log('Deleting todo at:', url);
-    axios.delete(url)
-      .then(() => {
-        setTodos(todos.filter(todo => todo._id !== id));
-      })
-      .catch(error => console.error('Error deleting todo:', error));
+  const deleteTodo = async (id) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/todos/${id}/delete`);
+      setTodos(todos.filter(todo => todo._id !== id));
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
   };
 
-  const filteredTodos = Array.isArray(todos) ? todos.filter(todo => {
+  const filteredTodos = todos.filter(todo => {
     if (filter === 'completed') return todo.status === 'completed';
     if (filter === 'incompleted') return todo.status === 'not_completed';
     return true;
-  }) : [];
+  });
 
   return (
     <div className="App">
